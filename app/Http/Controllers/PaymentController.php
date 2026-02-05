@@ -80,18 +80,16 @@ class PaymentController extends Controller
 
     public function handleWebhook(Request $request) 
     {
-        // টেস্ট করার জন্য নিচের ৩টি লাইন কমেন্ট করে দিন
         // $sig_header = $request->header('Stripe-Signature');
         // $endpoint_secret = env('STRIPE_WEBHOOK_SECRET');
         // $event = \Stripe\Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
 
-        // সরাসরি রিকোয়েস্ট বডি থেকে ডাটা নিন (শুধু টেস্টের জন্য)
         $event = json_decode($request->getContent());
 
         if ($event->type == 'payment_intent.succeeded') {
             $paymentIntent = $event->data->object;
             $userId = $paymentIntent->metadata->userId;
-            $amount = $paymentIntent->amount / 100;
+            $amount = $paymentIntent->amount;
 
             DB::transaction(function () use ($userId, $amount, $paymentIntent) {
                 DB::table('user')->where('userID', $userId)->decrement('solde', $amount);
@@ -147,7 +145,7 @@ class PaymentController extends Controller
             //         }
             //     }
             // }
-            
+
             $coupons = [
                 'SAVE10'    => ['type' => 'fixed', 'value' => 10],
                 'SAVE20'    => ['type' => 'fixed', 'value' => 20],

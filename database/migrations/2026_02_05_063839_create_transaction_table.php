@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transaction', function (Blueprint $table) {
-           $table->id('transID'); // Primary Key
-            $table->integer('userID')->index(); 
+            $table->id('transID');
+            $table->integer('userID')->index();
+            $table->integer('benId')->index();
+            $table->string('type'); 
             $table->decimal('amount', 10, 2);
             $table->string('status', 20)->default('pending');
-            $table->dateTime('date'); 
-            $table->string('reference', 50)->nullable(); 
+            $table->string('reference', 50)->nullable();
+            $table->dateTime('date');
             $table->timestamps();
         });
     }

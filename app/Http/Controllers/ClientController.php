@@ -48,4 +48,28 @@ class ClientController extends Controller
             ], 500);
         }
     }
+
+    public function getFilteredBeneficiaries(Request $request)
+    {
+        $type = $request->type;
+        $currentUserId = $request->userId;
+
+        $query = DB::table('beneficiaire')
+            ->join('user', 'beneficiaire.benId', '=', 'user.userID') 
+            ->where('beneficiaire.userId', $currentUserId)
+            ->select('user.userID', 'user.nprenom', 'user.fname');
+
+        if ($type === 'Depot Mobile') {
+            $query->whereNotNull('user.phone');
+        } elseif ($type === 'Depot Banquaire') {
+            $query->whereNotNull('user.cpt'); 
+        }
+
+        $beneficiaries = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $beneficiaries
+        ]);
+    }
 }
