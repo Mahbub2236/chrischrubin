@@ -31,7 +31,7 @@ services:
     networks:
       - payment-network
 
-  # Nginx Web Server
+# Nginx Web Server
   nginx:
     image: nginx:alpine
     container_name: payment-nginx
@@ -40,16 +40,23 @@ services:
     volumes:
       - .:/var/www/html
       - ./docker-config/nginx:/etc/nginx/conf.d
-    # Ekhaner double mapping ebong extra depends_on muche deya hoyeche
     depends_on:
       - app
     networks:
       - payment-network
 
-  # Redis
+  # Redis           
   redis:
     image: redis:alpine
     container_name: payment-redis
+    networks:
+      - payment-network
+
+  adminer:
+    image: adminer
+    container_name: payment-adminer
+    ports:
+      - "8080:8080"
     networks:
       - payment-network
 
