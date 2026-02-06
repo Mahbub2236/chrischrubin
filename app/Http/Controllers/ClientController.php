@@ -16,14 +16,6 @@ class ClientController extends Controller
         ]);
     }
 
-    public function getBeneficiaries($userId)
-    {
-        $beneficiaries = DB::table('beneficiaire')
-            ->where('userId', $userId)
-            ->get();
-        return response()->json($beneficiaries);
-    }
-
     public function getUserAccounts($userId)
     {
         try {
@@ -49,26 +41,43 @@ class ClientController extends Controller
         }
     }
 
-    public function getFilteredBeneficiaries(Request $request)
+    public function getBeneficiaries($userId)
     {
-        $type = $request->type;
-        $currentUserId = $request->userId;
-
-        $query = DB::table('beneficiaire')
-            ->join('user', 'beneficiaire.benId', '=', 'user.userID') 
-            ->where('beneficiaire.userId', $currentUserId)
-            ->select('user.userID', 'user.nprenom', 'user.fname');
-
-        if ($type === 'Depot Mobile') {
-            $query->whereNotNull('user.phone');
-        } elseif ($type === 'Depot Banquaire') {
-            $query->whereNotNull('user.cpt'); 
-        }
-
-        $beneficiaries = $query->get();
+        $beneficiaries = DB::table('beneficiaire')
+            ->join('user', 'beneficiaire.benId', '=', 'user.userID')
+            ->where('beneficiaire.userId', $userId)
+            ->select('user.userID', 'user.nprenom', 'user.phone', 'user.cpt')
+            ->get();
 
         return response()->json([
             'success' => true,
+            'data' => $beneficiaries
+        ]);
+    }
+    
+    public function getFilteredBeneficiaries(Request $request)
+    {
+        $type = $request->query('type'); 
+
+        $authUserId = auth()->id() ?? $request->query('userId'); 
+
+        $beneficiaries = DB::table('beneficiaire')
+            ->join('user', 'beneficiaire.benId', '=', 'user.userID')
+            ->where('beneficiaire.userId', $authUserId)
+            ->when($type === 'Depot Mobile', function ($query) {
+
+                return $query->whereNotNull('user.phone')->where('user.phone', '!=', '');
+            })
+            ->when($type === 'Depot Banquaire', function ($query) {
+
+                return $query->whereNotNull('user.cpt');
+            })
+            ->select('user.userID', 'user.nprenom', 'user.phone', 'user.cpt')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'selected_type' => $type,
             'data' => $beneficiaries
         ]);
     }
