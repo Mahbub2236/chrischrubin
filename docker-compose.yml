@@ -1,0 +1,61 @@
+services:
+  # PHP Application (Laravel)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-app
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+      - redis
+    networks:
+      - payment-network
+
+  # MySQL Database
+  db:
+    image: mysql:8
+    container_name: payment-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: yyccrancjk
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - payment-network
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: payment-nginx
+    ports:
+      - "8085:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker-config/nginx:/etc/nginx/conf.d
+    # Ekhaner double mapping ebong extra depends_on muche deya hoyeche
+    depends_on:
+      - app
+    networks:
+      - payment-network
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: payment-redis
+    networks:
+      - payment-network
+
+networks:
+  payment-network:
+    driver: bridge
+
+volumes:
+  dbdata:
