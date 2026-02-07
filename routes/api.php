@@ -14,7 +14,7 @@ Route::get('/client/beneficiaries/{userId}', [ClientController::class, 'getBenef
 Route::get('/user-accounts/{userId}', [ClientController::class, 'getUserAccounts']);
 Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
 Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
-Route::get('/transaction-summary', [PaymentController::class, 'getTransactionSummary']);
+Route::get('/process-transaction', [PaymentController::class, 'processTransaction']);
 Route::get('/filtered-beneficiaries', [ClientController::class, 'getFilteredBeneficiaries']);
 
 Route::post('/payment/create-intent', [PaymentController::class, 'createPaymentIntent']);

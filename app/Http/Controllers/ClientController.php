@@ -58,18 +58,15 @@ class ClientController extends Controller
     public function getFilteredBeneficiaries(Request $request)
     {
         $type = $request->query('type'); 
-
-        $authUserId = auth()->id() ?? $request->query('userId'); 
+        $authUserId = $request->query('userId');
 
         $beneficiaries = DB::table('beneficiaire')
             ->join('user', 'beneficiaire.benId', '=', 'user.userID')
             ->where('beneficiaire.userId', $authUserId)
             ->when($type === 'Depot Mobile', function ($query) {
-
                 return $query->whereNotNull('user.phone')->where('user.phone', '!=', '');
             })
             ->when($type === 'Depot Banquaire', function ($query) {
-
                 return $query->whereNotNull('user.cpt');
             })
             ->select('user.userID', 'user.nprenom', 'user.phone', 'user.cpt')
@@ -80,5 +77,10 @@ class ClientController extends Controller
             'selected_type' => $type,
             'data' => $beneficiaries
         ]);
+    }
+
+    public function getTransactionSummary()
+    {
+        //
     }
 }
